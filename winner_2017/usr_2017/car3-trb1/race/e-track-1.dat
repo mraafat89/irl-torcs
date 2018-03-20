@@ -1,0 +1,212 @@
+### turn #1 6.637
+cornerspeed<
+80 145 25.437500
+cornerspeed<
+145 210 23.500000
+brakedelay<
+90 145 35.000000
+lookahead<
+80 145 19.000000
+lookahead<
+145 210 13.000000
+cornerspeed cold<
+100 200 18
+rl right margin<
+173 200 1.0
+leftcornerspeed cold<
+80 160 16.0
+leftcornerspeed<
+80 160 18.0
+rightcornerspeed cold<
+80 160 19.0
+rightcornerspeed<
+80 160 20.0
+left brakedelay<
+80 160 35.0
+right brakedelay<
+80 160 30.0
+
+### right sweeper to 90 right 7.678
+cornerspeed<
+360 440 30.000000
+cornerspeed<
+440 475 25.812500
+cornerspeed<
+475 520 22.800000
+brakedelay<
+440 475 33.090599
+lookahead<
+360 440 12.000000
+lookahead<
+440 475 14.500000
+lookahead<
+475 520 12.000000
+cornerspeed cold<
+440 475 24.812500
+cornerspeed cold<
+475 520 19.000000
+rl left margin<
+350 465 0.5
+rl right margin<
+350 440 3
+rl right margin<
+470 500 0.5
+leftcornerspeed<
+360 460 32
+rightcornerspeed cold<
+360 460 43
+rightcornerspeed<
+360 460 30
+leftcornerspeed cold<
+460 520 21
+leftcornerspeed<
+460 520 21
+rightcornerspeed cold<
+460 520 25
+rightcornerspeed<
+460 520 21
+
+### chicken #1 6.847
+cornerspeed<
+525 585 23.406300
+cornerspeed<
+585 617 29.125000
+cornerspeed<
+617 662 19.037500
+brakedelay<
+525 585 42.000000
+lookahead<
+525 585 21.500000
+lookahead<
+585 617 20.000000
+lookahead<
+617 662 19.500000
+cornerspeed cold<
+525 585 20.406300
+cornerspeed cold<
+585 617 20.125000
+cornerspeed cold<
+617 662 18.537500
+rl left margin<
+550 600 0.5
+rl right margin<
+605 645 1.0
+leftcornerspeed cold<
+525 610 20.0
+leftcornerspeed cold<
+610 660 18.0
+leftcornerspeed<
+525 610 19.0
+leftcornerspeed<
+610 660 16.0
+rightcornerspeed cold<
+525 610 20.0
+rightcornerspeed cold<
+610 660 22.0
+rightcornerspeed<
+525 610 18.0
+rightcornerspeed<
+610 660 18.0
+overtake<
+480 750 0.7
+
+### hairpin 8.015
+cornerspeed<
+673 746 21.394101
+cornerspeed<
+746 810 24.000000
+brakedelay<
+673 746 25.750000
+lookahead<
+673 746 12.000000
+lookahead<
+746 810 10.000000
+cornerspeed cold<
+673 783 19
+rl left margin<
+743 776 2.0
+rl right margin<
+750 793 -1.0
+leftcornerspeed cold<
+670 810 25
+leftcornerspeed<
+670 810 22
+rightcornerspeed cold<
+670 810 46
+rightcornerspeed<
+670 810 22
+
+### bus stop 11.264
+cornerspeed<
+955 1025 28.5
+cornerspeed<
+1025 1035 25.046900
+cornerspeed<
+1035 1068 19.575000
+cornerspeed<
+1068 1100 20.200001
+cornerspeed<
+1100 1130 20.196875
+cornerspeed<
+1130 1180 27.196875
+brakedelay<
+1035 1068 28.000000
+lookahead<
+970 1035 12.000000
+lookahead<
+1035 1068 16.000000
+lookahead<
+1068 1100 16.000000
+lookahead<
+1100 1180 21.500000
+
+lookahead<
+955 1025 20
+lookahead<
+1025 1150 18
+rl left margin<
+1000 1080 0.5
+rl right margin<
+1000 1055 1.0
+rl right margin<
+1050 1078 1.6
+rl right margin<
+1078 1100 0.9
+rl right margin<
+1100 1200 0.5
+brakedelay<
+950 1073 25
+max lane<
+1000 1050 0.9
+overtake<
+1045 1118 0.3
+transitionincrement<
+1065 1110 0.8
+
+rl left margin<
+1090 1120 1.0
+cornerspeed cold<
+1020 1100 16.0
+cornerspeed cold<
+1105 1200 18.0
+Xspeed error factor<
+1090 1096 6.0
+Xspeed error factor<
+1110 1160 2.0
+
+leftcornerspeed cold<
+1030 1105 25
+leftcornerspeed<
+1030 1105 12
+rightcornerspeed cold<
+1030 1105 25
+rightcornerspeed<
+1030 1105 12
+left lookahead<
+1030 1105 18
+
+leftcornerspeed<
+1 3000 25.0
+rightcornerspeed<
+1 3000 25.0
+
