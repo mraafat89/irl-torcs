@@ -1,3 +1,0 @@
-[submodule "DDPG-Keras-Torcs"]
-	path = DDPG-Keras-Torcs
-	url = https://github.com/yanpanlau/DDPG-Keras-Torcs.git
