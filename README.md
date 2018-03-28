@@ -12,7 +12,7 @@ http://www.berniw.org/tutorials/robot/torcs/install/torcs-setup.html
 sudo pip install keras
 sudo pip install tensorflow
 sudo apt-get install xdotool xautomation
-
+pip install gym
 5. in this repo, cd DDPG-Keras-Torcs
 then python ddpg.py
 
