@@ -1,5 +1,5 @@
 #Imports
-import utils
+from utils import save_episode, save_weights, load_actor_weights, load_critic_weights, load_reward_weights, load_expert_data
 
 """
 Initialize models (optionally load weights)
@@ -73,6 +73,7 @@ if train_actor_critic:
 
 else:
 	load_actor_weights(actor_network, actor_weights_path)
+	load_critic_weights(critic_network, critic_weights_path)
 
 
 # Run Testing Demonstration
