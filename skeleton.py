@@ -1,4 +1,5 @@
 #Imports
+import utils
 
 """
 Initialize models (optionally load weights)
@@ -10,27 +11,44 @@ Initialize models (optionally load weights)
 	- Reward network: Takes in environmental state and returns the reward of that state (from IRL)
 """
 
-rl_epochs = 20
-irl_epochs = 20
 
+rl_epochs = 20
+expert_epochs = 5
+expert_length = 100
+
+run_expert = True
 train_reward = True
 train_actor_critic = True
 
-reward_network = Reward()	#TODO Define these networks!
-actor_network = Actor()
+reward_weights_path = ""
+actor_weights_path = ""
+critic_weights_path = ""
+
+reward_network = Reward()	#TODO: Define these networks!
+actor_network = Actor()		
 critic_network = Critic()
 
 
 # Begin IRL Training (Optionally load weights)
 if train_reward:
-	for e in irl_epochs:
-		expert_states, expert_actions = get_replay_buffer(e)	
-			# Collect sample from expert driver
-			# angle, track, trackPos, speedX, speedY, speedZ, wheelSpinVel, rpm
+	# Begin Expert data collection (Optionally load previously collected data)
+	if run_expert:
+		for e in in range(expert_epochs):
+			states, actions = collect_episode(expert_length)
+			save_episode(episode_name, states, actions)			# save with filenames according to date/time
+
+	# Load previously collected expert data
+	expert_episodes = load_expert_data(expert_data_path)
+
+	for e in expert_episodes:
+		states, actions = get_episode(e)	
+		# Collect sample from expert driver
+		# angle, track, trackPos, speedX, speedY, speedZ, wheelSpinVel, rpm
 
 		# Train Reward network with IRL
 
 	# Save reward network weights
+	save_weights(reward_network, reward_weights_path)		# From utils folder
 
 else:
 	load_reward_weights(reward_network, reward_weights_path)
@@ -51,6 +69,7 @@ if train_actor_critic:
 		# train the critic
 
 # Save actor, critic, and target weights
+	save_weights(actor_network, actor_weights_path) 	# From utils folder
 
 else:
 	load_actor_weights(actor_network, actor_weights_path)
