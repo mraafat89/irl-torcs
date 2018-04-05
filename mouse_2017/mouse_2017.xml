@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    file          : mouse_2017.xml
+    created       : 7 May 2017
+    last modified : 7 May 2017
+    copyright     : (C) 2017 Tim Foden
+-->
+
+<!--    This program is free software; you can redistribute it and/or modify  -->
+<!--    it under the terms of the GNU General Public License as published by  -->
+<!--    the Free Software Foundation; either version 2 of the License, or     -->
+<!--    (at your option) any later version.                                   -->
+
+<!DOCTYPE params SYSTEM "../../libs/tgf/params.dtd">
+
+<params name="mouse" type="robotdef">
+  <section name="Robots">
+    <section name="index">
+
+      <section name="0">
+        <attstr name="name" val="Mouse 2017 1"></attstr>
+        <attstr name="desc" val="1"></attstr>
+        <attstr name="team" val="Rat Race"></attstr>
+        <attstr name="author" val="Tim Foden"></attstr>
+        <attstr name="car name" val="car8-trb1"></attstr>
+        <attstr name="skill level" val="pro"/>
+        <attnum name="race number" val="7"></attnum>
+        <attnum name="red" val="0.7"></attnum>
+        <attnum name="green" val="0.7"></attnum>
+        <attnum name="blue" val="0.7"></attnum>
+      </section>
+
+      <section name="1">
+        <attstr name="name" val="Mouse 2017 2"></attstr>
+        <attstr name="desc" val="2"></attstr>
+        <attstr name="team" val="Rat Race"></attstr>
+        <attstr name="author" val="Tim Foden"></attstr>
+        <attstr name="car name" val="car8-trb1"></attstr>
+        <attstr name="skill level" val="pro"/>
+        <attnum name="race number" val="8"></attnum>
+        <attnum name="red" val="0.7"></attnum>
+        <attnum name="green" val="0.7"></attnum>
+        <attnum name="blue" val="0.7"></attnum>
+      </section>
+
+    </section>
+  </section>
+</params>
