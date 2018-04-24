@@ -11,7 +11,7 @@ q1_filepath = dir_name + "Q1_table"
 q2_filepath = dir_name + "Q2_table"
 #Make sure to change filepath name!
 
-episodes = 100
+episodes = 3
 steps = 100000
 
 # element 0 - angle
@@ -94,12 +94,14 @@ def trainAgent():
 	plt.ylabel('Rewards')
 	fig.savefig('rewards.png')
 	
+	fig = plt.figure()
 	plt.plot(angles)
 	plt.xlabel('Episodes')
 	plt.ylabel('Angle-Variances')
 	fig.savefig('angles.png')
 	
-	plt.plot(rewards)
+	fig = plt.figure()
+	plt.plot(distances)
 	plt.xlabel('Episodes')
 	plt.ylabel('Distances')
 	fig.savefig('distances.png')
