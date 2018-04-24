@@ -3,15 +3,16 @@ import numpy as np
 import random
 import project
 import os
+import matplotlib.pyplot as plt
 
-saverate = 3
+saverate = 5
 dir_name = "Q_tables/"
 q1_filepath = dir_name + "Q1_table"
 q2_filepath = dir_name + "Q2_table"
 #Make sure to change filepath name!
 
 episodes = 100
-steps = 10000
+steps = 100000
 
 # element 0 - angle
 # element 1:19 - range
@@ -35,14 +36,13 @@ def trainAgent():
 	print("Loading TORCS environment")
 	env = TorcsEnv(vision=False, throttle=True, gear_change=False)
 	agent = project.Q_learn(q1_filepath, q2_filepath, 0.1)
-
-	#define/load Q-TABLE here
-	#if os.path.isfile(filepath):
-	#	Q = np.load(filepath)
-
-	#else:
-	#	Q = np.array([num_states, num_actions])
-
+	if not os.path.exists(dir_name):
+		os.makedirs(dir_name)
+	
+	rewards = np.zeros(episodes)
+	angles = np.zeros(episodes)
+	distances = np.zeros(episodes)
+	
 	for ep in range(episodes):
 		if np.mod(ep, 3) == 0:
 			ob = env.reset(relaunch=True)
@@ -50,23 +50,35 @@ def trainAgent():
 
 		else: 
 			ob = env.reset()
-
+		
+		distance = 0
+		angle_variance = []
+		
+		reward = 0
 		action = np.zeros([3])
 		last_state = filter_observations(ob)
-		reward = 0
 		for i in range(steps):
 			ob, r, done, info = env.step(action)
 			reward += r
 			state = filter_observations(ob)
-
+			
 			#Run Q-Learn forward pass
 			action = agent.learn(last_state, action, state, r)
-
+			angle_variance.append(state[0])
+			distance = state[4]
+			
 			last_state = state
 			print "Episode:", ep, "Step:", i, "Reward:", reward
 
 			if done:
 				break
+		
+		angle_variance = np.asarray(angle_variance)
+		var = np.sum(np.square(angle_variance-np.mean(angle_variance)))/np.size(angle_variance)
+		
+		rewards[ep] = reward
+		angles[ep] = var
+		distances[ep] = distance
 		
 		print("Episode reward:", reward)
 		if np.mod(ep, saverate) == 0:
@@ -75,7 +87,24 @@ def trainAgent():
 
 	env.end()
 	print("Experiment ended")
-
+	
+	fig = plt.figure()
+	plt.plot(rewards)
+	plt.xlabel('Episodes')
+	plt.ylabel('Rewards')
+	fig.savefig('rewards.png')
+	
+	plt.plot(angles)
+	plt.xlabel('Episodes')
+	plt.ylabel('Angle-Variances')
+	fig.savefig('angles.png')
+	
+	plt.plot(rewards)
+	plt.xlabel('Episodes')
+	plt.ylabel('Distances')
+	fig.savefig('distances.png')
+	
+	print("Figures saved")
 
 def playTORCS():
 	print("Loading TORCS environment")

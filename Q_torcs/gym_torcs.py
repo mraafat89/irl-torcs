@@ -168,7 +168,7 @@ class TorcsEnv:
         snapY = (jerkY - prevJerkY)/stepTime
 
         
-        reward = sp*np.cos(obs['angle']) - np.abs(sp*np.sin(obs['angle'])) - sp * np.abs(obs['trackPos']) - 0.0001*abs(snapY)
+        reward = sp*np.cos(obs['angle']) - np.abs(sp*np.sin(obs['angle'])) - sp * np.abs(obs['trackPos']) - 0.0005*abs(snapY)
         progress = sp
 
         prevSpeedX = sp
