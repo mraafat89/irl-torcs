@@ -1,18 +1,17 @@
 from gym_torcs import TorcsEnv
 import numpy as np
 import random
-import project
+import q
 import os
 import matplotlib.pyplot as plt
 
-saverate = 5
+saverate = 3
 dir_name = "Q_tables/"
-q1_filepath = dir_name + "Q1_table"
-q2_filepath = dir_name + "Q2_table"
+q_filepath = dir_name + "Q_table"
 #Make sure to change filepath name!
 
-episodes = 3
-steps = 100000
+episodes = 5000
+steps = 1000000
 
 # element 0 - angle
 # element 1:19 - range
@@ -23,9 +22,9 @@ steps = 100000
 def filter_observations(ob):
 	sensors = np.zeros(7)
 	sensors[0] = ob.angle
-	sensors[1] = ob.track[4]
+	sensors[1] = ob.track[5]
 	sensors[2] = ob.track[9]
-	sensors[3] = ob.track[14]
+	sensors[3] = ob.track[13]
 	sensors[4] = ob.trackPos
 	sensors[5] = ob.speedX
 	sensors[6] = ob.speedY
@@ -35,7 +34,7 @@ def filter_observations(ob):
 def trainAgent():
 	print("Loading TORCS environment")
 	env = TorcsEnv(vision=False, throttle=True, gear_change=False)
-	agent = project.Q_learn(q1_filepath, q2_filepath, 0.1)
+	agent = q.Q_learn(q_filepath, 0.1)
 	if not os.path.exists(dir_name):
 		os.makedirs(dir_name)
 	
@@ -44,9 +43,11 @@ def trainAgent():
 	distances = np.zeros(episodes)
 	
 	for ep in range(episodes):
+		agent.epsilon = 0.1 * (1. - float(ep)/episodes)
+		
 		if np.mod(ep, 3) == 0:
 			ob = env.reset(relaunch=True)
-			print("Reseting TORCS environment")
+			print "Resetting TORCS environment"
 
 		else: 
 			ob = env.reset()
@@ -55,9 +56,14 @@ def trainAgent():
 		angle_variance = []
 		
 		reward = 0
+		done = False
 		action = np.zeros([3])
+		action[1] = 1.
 		last_state = filter_observations(ob)
 		for i in range(steps):
+			if done:
+				break
+				
 			ob, r, done, info = env.step(action)
 			reward += r
 			state = filter_observations(ob)
@@ -65,24 +71,19 @@ def trainAgent():
 			#Run Q-Learn forward pass
 			action = agent.learn(last_state, action, state, r)
 			angle_variance.append(state[0])
-			distance = state[4]
 			
 			last_state = state
-			print "Episode:", ep, "Step:", i, "Reward:", reward
 
-			if done:
-				break
-		
+		print "Episode:", ep, "Steps:", i, "Reward:", reward
 		angle_variance = np.asarray(angle_variance)
 		var = np.sum(np.square(angle_variance-np.mean(angle_variance)))/np.size(angle_variance)
 		
 		rewards[ep] = reward
 		angles[ep] = var
-		distances[ep] = distance
-		
-		print("Episode reward:", reward)
+		distances[ep] = ob.distFromStart
+
 		if np.mod(ep, saverate) == 0:
-			agent.save_Qs()
+			agent.save_Q()
 			print("Saved Q-table")
 
 	env.end()
@@ -108,26 +109,6 @@ def trainAgent():
 	
 	print("Figures saved")
 
-def playTORCS():
-	print("Loading TORCS environment")
-	env = TorcsEnv(vision=False, throttle=True, gear_change=False)
-	#load Q-TABLE here
-	Q = np.load(filepath)
-	ob = env.reset()
-
-	while(True):
-		#run Q-Learn forward pass
-		action = np.zeros([1,3])
-		ob, r, done, info = env.step(action)
-
-		if done:
-			break
-
-	env.end()
-	print("Demo Ended")
-
-
 if __name__ == "__main__":
 	trainAgent()
-	#playTORCS()
 

@@ -150,7 +150,7 @@ class Client(object):
             print u'Error: Could not create socket...'
             sys.exit(-1)
         # == Initialize Connection To Server ==
-        self.so.settimeout(1)
+        self.so.settimeout(0.5)
 
         n_fail = 5
         while True:

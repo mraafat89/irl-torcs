@@ -27,9 +27,10 @@ accY = 0
 jerkY = 0
 snapY = 0
 past_t = 0
+past_d = 0
 
 class TorcsEnv:
-    terminal_judge_start = 200  # If after 100 timestep still no progress, terminated
+    terminal_judge_start = 100  # If after 100 timestep still no progress, terminated
     termination_limit_progress = 5  # [km/h], episode terminates if car is running slower than this limit
     default_speed = 50
 
@@ -80,7 +81,7 @@ class TorcsEnv:
     def step(self, u):
         global prevSpeedX, prevAccX, prevJerkX, prevSnapX, accX, jerkX, snapX
         global prevSpeedY, prevAccY, prevJerkY, prevSnapY, accY, jerkY, snapY
-        global past_t
+        global past_t, past_d
 
        #print("Step")
         # convert thisAction to the actual torcs actionstr
@@ -155,10 +156,14 @@ class TorcsEnv:
         sp = np.array(obs['speedX'])
         damage = np.array(obs['damage'])
         rpm = np.array(obs['rpm'])
+        
         t = np.array(obs['curLapTime'])
         stepTime = t - past_t
         past_t = t
-
+		
+        d = obs['distFromStart'] - past_d
+        past_d = obs['distFromStart']
+		
         accX = (sp - prevSpeedX)/stepTime
         jerkX = (accX - prevAccX)/stepTime
         snapX = (jerkX - prevJerkX)/stepTime
@@ -168,7 +173,13 @@ class TorcsEnv:
         snapY = (jerkY - prevJerkY)/stepTime
 
         
-        reward = sp*np.cos(obs['angle']) - np.abs(sp*np.sin(obs['angle'])) - sp * np.abs(obs['trackPos']) - 0.0005*abs(snapY)
+        #reward = d + sp*np.cos(obs['angle']) - np.abs(sp*np.sin(obs['angle'])) - 0.1*sp * np.abs(obs['trackPos']) - 0.00001*abs(snapY)
+        #Rspeed = np.power((sp/float(160)),4)*0.05
+        #Rtrackpos = np.power(1/(float(np.abs(obs['trackPos']))+1),4)*0.7
+        #Rangle = np.power((1/((float(np.abs(obs['angle']))/40)+1)),4)*0.25
+        #reward = Rspeed + Rtrackpos + Rangle - 0.5
+        reward = sp*np.cos(obs['angle']) - np.abs(sp*np.sin(obs['angle'])) - sp*np.abs(obs['trackPos'])
+        
         progress = sp
 
         prevSpeedX = sp
@@ -185,14 +196,15 @@ class TorcsEnv:
 
         # Termination judgement #########################
         episode_terminate = False
-        #if (abs(track.any()) > 1 or abs(trackPos) > 1):  # Episode is terminated if the car is out of track
-        #    reward = -200
-        #    episode_terminate = True
-        #    client.R.d['meta'] = True
+        if (abs(track.any()) > 1 or abs(trackPos) > 1):  # Episode is terminated if the car is out of track
+            reward -= 20.
+            episode_terminate = True
+            client.R.d['meta'] = True
 
         if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
             if progress < self.termination_limit_progress:
-                print("No progress")
+                print "No progress"
+                reward -= 20.
                 episode_terminate = True
                 client.R.d['meta'] = True
 
@@ -290,7 +302,8 @@ class TorcsEnv:
                      'track', 
                      'trackPos',
                      'wheelSpinVel',
-										 'curLapTime']
+					 'curLapTime',
+					 'distFromStart']
             Observation = col.namedtuple('Observaion', names)
             return Observation(focus=np.array(raw_obs['focus'], dtype=np.float32)/200.,
                                speedX=np.array(raw_obs['speedX'], dtype=np.float32)/300.0,
@@ -303,7 +316,8 @@ class TorcsEnv:
                                track=np.array(raw_obs['track'], dtype=np.float32)/200.,
                                trackPos=np.array(raw_obs['trackPos'], dtype=np.float32)/1.,
                                wheelSpinVel=np.array(raw_obs['wheelSpinVel'], dtype=np.float32),
-															 curLapTime=np.array(raw_obs['curLapTime'], dtype=np.float32))
+							   curLapTime=np.array(raw_obs['curLapTime'], dtype=np.float32),
+							   distFromStart=np.array(raw_obs['distFromStart'], dtype=np.float32))
         else:
             names = ['focus',
                      'speedX', 'speedY', 'speedZ', 'angle',
