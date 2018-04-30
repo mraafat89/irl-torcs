@@ -33,7 +33,7 @@ class Q_learn:
             idx += 1
                       
         self.num_actions = len(self.A)
-        self.num_states = 14*6*6*11*10*9
+        self.num_states = 14*6*6*9*9*10
         self._initialize_Qs()
 
 
@@ -102,23 +102,23 @@ class Q_learn:
         a = self.get_action(action)
         r = reward
 
-        #if s != sp or done:	
-        if np.random.rand() < 0.5:
-            self.Q1[s,a] += self.alpha * (r + self.gamma * self.Q2[sp, np.argmax(self.Q1[sp, :])] - self.Q1[s, a])
-        else:
-            self.Q2[s, a] = self.Q2[s, a] + self.alpha * (r + self.gamma * self.Q1[sp, np.argmax(self.Q2[sp, :])] - self.Q2[s, a])
+        if s != sp or done:	
+            if np.random.rand() < 0.5:
+                self.Q1[s,a] += self.alpha * (r + self.gamma * self.Q2[sp, np.argmax(self.Q1[sp, :])] - self.Q1[s, a])
+            else:
+                self.Q2[s, a] = self.Q2[s, a] + self.alpha * (r + self.gamma * self.Q1[sp, np.argmax(self.Q2[sp, :])] - self.Q2[s, a])
 
 
-        if np.random.rand() > self.epsilon:
-            print s, (self.Q1 + self.Q2)[s, :]
-            ap = np.argmax((self.Q1 + self.Q2)[sp, :])
-            
-        else:
-            print s, (self.Q1 + self.Q2)[s, :], ": RANDOM"
-            ap = np.random.randint(self.num_actions)
+            if np.random.rand() > self.epsilon:
+                print s, (self.Q1 + self.Q2)[s, :]
+                ap = np.argmax((self.Q1 + self.Q2)[sp, :])
                 
-        #else:
-        #    ap = a
+            else:
+                print s, (self.Q1 + self.Q2)[s, :], ": RANDOM"
+                ap = np.random.randint(self.num_actions)
+                
+        else:
+            ap = a
         
       
         return self.get_car_inputs(ap)
@@ -132,15 +132,15 @@ class Q_learn:
 
 
     def get_state(self,inputs):
-        angle = self.disc_angle(inputs[0])
-        ray0 = self.disc_track(inputs[1])
+        angle = self.disc_angle(inputs[0])  #14
+        ray0 = self.disc_track(inputs[1])	#6
         #ray1 = self.disc_track(inputs[2])
-        ray2 = self.disc_track(inputs[3])
-        pos = self.disc_trackPos(inputs[4])
-        sx = self.disc_speedx(inputs[5])
-        sy = self.disc_speedy(inputs[6])
+        ray2 = self.disc_track(inputs[3])   #6
+        pos = self.disc_trackPos(inputs[4]) #9
+        sx = self.disc_speedx(inputs[5])    #9
+        sy = self.disc_speedy(inputs[6])    #10
 
-        return angle*(6*6*11*10*9) + ray0*(6*11*10*9) + ray2*(11*10*9) + pos*(10*9) + sx*(9) + sy
+        return angle*(6*6*9*9*10) + ray0*(6*9*9*10) + ray2*(9*9*10) + pos*(9*10) + sx*(10) + sy
 
     def disc_angle(self,x):
         if   x < -1.0                  : y = 0
@@ -161,17 +161,15 @@ class Q_learn:
         return y
 
     def disc_trackPos(self,x):
-        if   x < -0.5                  : y = 0
-        elif x >= -0.5 and x < -0.3    : y = 1
-        elif x >= -0.3 and x < -0.15   : y = 2
-        elif x >= -0.15 and x < -0.1   : y = 3
-        elif x >= -0.1 and x < -0.05   : y = 4
-        elif x >= -0.05 and x < 0.05   : y = 5
-        elif x >= 0.05 and x < 0.1     : y = 6
-        elif x >= 0.1 and x < 0.15     : y = 7
-        elif x >= 0.15 and x < 0.3     : y = 8
-        elif x >= 0.3 and x < 0.5      : y = 9
-        else                           : y = 10
+        if   x < -0.3                  : y = 0
+        elif x >= -0.3 and x < -0.15   : y = 1
+        elif x >= -0.15 and x < -0.1   : y = 2
+        elif x >= -0.1 and x < -0.05   : y = 3
+        elif x >= -0.05 and x < 0.05   : y = 4
+        elif x >= 0.05 and x < 0.1     : y = 5
+        elif x >= 0.1 and x < 0.15     : y = 6
+        elif x >= 0.15 and x < 0.3     : y = 7
+        else                           : y = 8
 
         return y
 
@@ -183,20 +181,6 @@ class Q_learn:
         elif x >= 0.15 and x < 0.25:     y = 4
         else:                            y = 5
 	    
-        return y
-
-    def disc_speedy(self,x):
-        if   x < -0.5:                   y = 0
-        elif x >= -0.5  and x < -0.1:    y = 1
-        elif x >= -0.1  and x < -0.05:   y = 2
-        elif x >= -0.05 and x < -0.01:   y = 3
-        elif x >= -0.01 and x < 0.:      y = 4
-        elif x >= 0.    and x < 0.01:    y = 5
-        elif x >= 0.01  and x < 0.05:    y = 6
-        elif x >= 0.05  and x < 0.1:     y = 7
-        elif x >= 0.1   and x < 0.5:     y = 8
-        else:                            y = 9
-        
         return y
 
     def disc_speedx(self,x):
@@ -211,5 +195,19 @@ class Q_learn:
         else:                            y = 8
 
         return y 
+        
+    def disc_speedy(self,x):
+        if   x < -0.5:                   y = 0
+        elif x >= -0.5  and x < -0.1:    y = 1
+        elif x >= -0.1  and x < -0.05:   y = 2
+        elif x >= -0.05 and x < -0.01:   y = 3
+        elif x >= -0.01 and x < 0.:      y = 4
+        elif x >= 0.    and x < 0.01:    y = 5
+        elif x >= 0.01  and x < 0.05:    y = 6
+        elif x >= 0.05  and x < 0.1:     y = 7
+        elif x >= 0.1   and x < 0.5:     y = 8
+        else:                            y = 9
+        
+        return y
 
 
