@@ -1,18 +1,18 @@
 from gym_torcs import TorcsEnv
 import numpy as np
 import random
-import q
-import os
+import single
+import os, signal
 import matplotlib.pyplot as plt
-
+import time
 saverate = 3
 dir_name = "Q_tables/"
 q_filepath = dir_name + "Q_table"
 #Make sure to change filepath name!
 
-episodes = 5000
 steps = 1000000
-
+LR = 0.225
+RR = 0.25
 # element 0 - angle
 # element 1:19 - range
 # element 20 - track positions
@@ -34,81 +34,94 @@ def filter_observations(ob):
 def trainAgent():
 	print("Loading TORCS environment")
 	env = TorcsEnv(vision=False, throttle=True, gear_change=False)
-	agent = q.Q_learn(q_filepath, 0.1)
+	agent = single.Q_learn(q_filepath, LR, RR)
 	if not os.path.exists(dir_name):
 		os.makedirs(dir_name)
+	if not os.path.exists("results"):
+		os.makedirs("results")
 	
-	rewards = np.zeros(episodes)
-	angles = np.zeros(episodes)
-	distances = np.zeros(episodes)
-	
-	for ep in range(episodes):
-		agent.epsilon = 0.1 * (1. - float(ep)/episodes)
-		
-		if np.mod(ep, 3) == 0:
-			ob = env.reset(relaunch=True)
-			print "Resetting TORCS environment"
+	run = True
+	ep = len(agent.rewards)
+	while run:
+		try:
+			if np.mod(ep, 3) == 0:
+				ob = env.reset(relaunch=True)
+				print "Resetting TORCS environment"
 
-		else: 
-			ob = env.reset()
+			else: 
+				ob = env.reset()
 		
-		distance = 0
-		angle_variance = []
-		
-		reward = 0
-		done = False
-		action = np.zeros([3])
-		action[1] = 1.
-		last_state = filter_observations(ob)
-		for i in range(steps):
-			if done:
-				break
+			#agent.alpha = max(0.225,LR*np.power(0.99,ep))
+			agent.epsilon = max(0.1,RR*np.power(0.999,ep))
+			reward = 0
+			done = False
+			angle_variance = []
+			action = np.zeros([3])
+			action[1] = 1.
+			last_state = filter_observations(ob)
+			dp = ob.distFromStart
+			d = 0.
+			for i in range(steps):
+				if done:
+					break
 				
-			ob, r, done, info = env.step(action)
-			reward += r
-			state = filter_observations(ob)
-			
-			#Run Q-Learn forward pass
-			action = agent.learn(last_state, action, state, r)
-			angle_variance.append(state[0])
-			
-			last_state = state
+				ob, r, done, info = env.step(action)
+				reward += r
+				dn = ob.distFromStart
+				if np.abs(dn-dp) < 100.: d += dn-dp
+				
+				state = filter_observations(ob)
 
-		print "Episode:", ep, "Steps:", i, "Reward:", reward
-		angle_variance = np.asarray(angle_variance)
-		var = np.sum(np.square(angle_variance-np.mean(angle_variance)))/np.size(angle_variance)
+				#Run Q-Learn forward pass
+				#start = time.time()
+				action = agent.learn(last_state, action, state, r, done)
+				#print time.time() - start
+				angle_variance.append(state[0])
+			
+				last_state = state
+				
+			print "Episode:", ep, "Steps:", i, "Reward:", reward
+			print "LR:", agent.alpha
+			print "RR:", agent.epsilon
+			angle_variance = np.asarray(angle_variance)
+			var = np.sum(np.square(angle_variance-np.mean(angle_variance)))/np.size(angle_variance)
 		
-		rewards[ep] = reward
-		angles[ep] = var
-		distances[ep] = ob.distFromStart
-
-		if np.mod(ep, saverate) == 0:
-			agent.save_Q()
-			print("Saved Q-table")
-
-	env.end()
-	print("Experiment ended")
+			agent.rewards.append(reward)
+			agent.angles.append(var)
+			agent.distances.append(d)
+			
+			ep += 1
+			
+			if np.mod(ep, saverate) == 0:
+				agent.save_Q()
+				print("Saved Q-table")
+				
+		except KeyboardInterrupt:
+			print "Ending training"
+			run = False
+			env.end()
+			
+			fig = plt.figure()
+			plt.plot(np.asarray(agent.rewards))
+			plt.xlabel('Episodes')
+			plt.ylabel('Rewards')
+			fig.savefig('results/rewards.png')
 	
-	fig = plt.figure()
-	plt.plot(rewards)
-	plt.xlabel('Episodes')
-	plt.ylabel('Rewards')
-	fig.savefig('rewards.png')
+			fig = plt.figure()
+			plt.plot(np.asarray(agent.angles))
+			plt.xlabel('Episodes')
+			plt.ylabel('Angle-Variances')
+			fig.savefig('results/angles.png')
 	
-	fig = plt.figure()
-	plt.plot(angles)
-	plt.xlabel('Episodes')
-	plt.ylabel('Angle-Variances')
-	fig.savefig('angles.png')
+			fig = plt.figure()
+			plt.plot(np.asarray(agent.distances))
+			plt.xlabel('Episodes')
+			plt.ylabel('Distances')
+			fig.savefig('results/distances.png')
 	
-	fig = plt.figure()
-	plt.plot(distances)
-	plt.xlabel('Episodes')
-	plt.ylabel('Distances')
-	fig.savefig('distances.png')
-	
-	print("Figures saved")
+			print "Figures saved"
 
 if __name__ == "__main__":
+	np.set_printoptions(precision=2)
 	trainAgent()
 

@@ -12,8 +12,8 @@ q2_filepath = dir_name + "Q2_table"
 #Make sure to change filepath name!
 
 steps = 1000000
-LR = 0.225
-RR = 0.35
+LR = 0.125
+RR = 0.5
 # element 0 - angle
 # element 1:19 - range
 # element 20 - track positions
@@ -52,8 +52,8 @@ def trainAgent():
 			else: 
 				ob = env.reset()
 		
-			#agent.alpha = max(0.225,LR * np.power(0.99,ep))
-			agent.epsilon = max(0.2,RR * np.power(0.999,ep))
+			#agent.alpha = max(0.225,LR*np.power(0.99,ep))
+			agent.epsilon = max(0.1,RR*np.power(0.999,ep))
 			reward = 0
 			done = False
 			angle_variance = []

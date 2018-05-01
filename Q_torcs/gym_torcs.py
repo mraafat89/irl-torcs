@@ -178,8 +178,8 @@ class TorcsEnv:
         #Rtrackpos = np.power(1/(float(np.abs(obs['trackPos']))+1),4)*0.7
         #Rangle = np.power((1/((float(np.abs(obs['angle']))/40)+1)),4)*0.25
         #reward = Rspeed + Rtrackpos + Rangle - 0.5
-        reward = sp*np.cos(obs['angle']) - np.abs(sp*np.sin(obs['angle'])) - sp*np.abs(obs['trackPos'])
-        
+        #reward = sp*(np.cos(obs['angle']) - np.abs(np.sin(obs['angle'])) - 10*np.abs(obs['angle'])*np.abs(obs['trackPos']))
+        reward = sp*(0.1-np.abs(obs['angle'])) + sp*(0.3-np.abs(obs['trackPos']))
         progress = sp
 
         prevSpeedX = sp

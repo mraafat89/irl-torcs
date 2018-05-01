@@ -96,7 +96,7 @@ class Q_learn:
 
 
     def learn(self,inputs,action,inputsprime,reward,done):
-        #angle, track 1x19, track_positon, speedx,speedy
+        #angle, track 1x19, track_positon, speedx, speedy
         s = self.get_state(inputs)
         sp = self.get_state(inputsprime)
         a = self.get_action(action)
@@ -110,11 +110,11 @@ class Q_learn:
 
 
             if np.random.rand() > self.epsilon:
-                print s, (self.Q1 + self.Q2)[s, :]
+                print s, r, (self.Q1 + self.Q2)[s, :]
                 ap = np.argmax((self.Q1 + self.Q2)[sp, :])
                 
             else:
-                print s, (self.Q1 + self.Q2)[s, :], ": RANDOM"
+                print s, r, (self.Q1 + self.Q2)[s, :], ": RANDOM"
                 ap = np.random.randint(self.num_actions)
                 
         else:
