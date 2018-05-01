@@ -89,7 +89,7 @@ def trainAgent():
 			agent.rewards.append(reward)
 			agent.angles.append(var)
 			agent.distances.append(d)
-			
+			agent.times.append(ob.curLapTime)
 			ep += 1
 			
 			if np.mod(ep, saverate) == 0:
@@ -119,6 +119,11 @@ def trainAgent():
 			plt.ylabel('Distances')
 			fig.savefig('results/distances.png')
 	
+			fig = plt.figure()
+			plt.plot(np.asarray(agent.times))
+			plt.xlabel('Episodes')
+			plt.ylabel('Lap Times')
+			fig.savefig('results/times.png')
 			print "Figures saved"
 
 if __name__ == "__main__":

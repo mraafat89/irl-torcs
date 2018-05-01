@@ -47,18 +47,20 @@ class Q_learn:
             self.rewards = np.load("results/singleQ_rewards.npy").tolist()
             self.distances = np.load("results/singleQ_distances.npy").tolist()
             self.angles = np.load("results/singleQ_angles.npy").tolist()
+            self.times = np.load("results/singleQ_times.npy").tolist()
             print "Loaded existing results"
         else:
 			self.rewards = []
 			self.distances = []
 			self.angles = []
+			self.times = []
 
     def save_Q(self):
         np.save(self.filepath_Q,self.Q)
         np.save("results/singleQ_rewards",self.rewards)
         np.save("results/singleQ_distances",self.distances)
         np.save("results/singleQ_angles",self.angles)
-	        
+        np.save("results/singleQ_times",self.times)   
     # def doubleQ(initial_Q1, initial_Q2, initial_state, transition,
     #             num_episodes, gamma, alpha, epsilon=0.1):
     #     # This function implements double Q-learning. It returns Q1, Q2 and their sum Q
