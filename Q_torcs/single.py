@@ -100,11 +100,11 @@ class Q_learn:
             self.Q[s, a] = self.Q[s, a] + self.alpha * (r + self.gamma * self.Q[sp, np.argmax(self.Q[sp, :])] - self.Q[s, a])
 
             if np.random.rand() > self.epsilon:
-                print s, "%.1f" % r, self.Q[s, :]
+                #print s, "%.1f" % r, self.Q[s, :]
                 ap = np.argmax(self.Q[sp, :])
 
             else:
-                print s, "%.1f" % r, self.Q[s, :], ": RANDOM"
+                #print s, "%.1f" % r, self.Q[s, :], ": RANDOM"
                 ap = np.random.randint(self.num_actions)
                 
         else:

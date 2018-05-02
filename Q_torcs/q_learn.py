@@ -6,6 +6,8 @@ import os, signal
 import matplotlib.pyplot as plt
 import time
 import argparse
+from termcolor import colored
+
 saverate = 3
 dir_name = "Q_tables/"
 q_filepath = dir_name + "Q_table"
@@ -84,8 +86,8 @@ def trainAgent(arglist):
 				angle_variance.append(state[0])
 			
 				last_state = state
-				
-			print "Episode:", ep, "Steps:", i, "Reward:", reward
+
+			print colored('Episode: '+ str(ep) + ' Steps: '+ str(i) + ' Reward: '+ str(reward), 'red')
 			print "LR:", agent.alpha
 			print "RR:", agent.epsilon
 			angle_variance = np.asarray(angle_variance)
