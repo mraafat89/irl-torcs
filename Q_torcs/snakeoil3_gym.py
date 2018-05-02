@@ -118,10 +118,10 @@ def bargraph(x,mn,mx,w,c=u'X'):
     return u'[%s]' % (nnc+npc+ppc+pnc)
 
 class Client(object):
-    def __init__(self,H=None,p=None,i=None,e=None,t=None,s=None,d=None,vision=False):
+    def __init__(self,H=None,p=None,i=None,e=None,t=None,s=None,d=None,vision=False, display=False):
         # If you don't like the option defaults,  change them here.
         self.vision = vision
-
+        self.display = display
         self.host= u'localhost'
         self.port= 3001
         self.sid= u'SCR'
@@ -130,7 +130,7 @@ class Client(object):
         self.stage= 3 # 0=Warm-up, 1=Qualifying 2=Race, 3=unknown <Default=3>
         self.debug= False
         self.maxSteps= 100000  # 50steps/second
-        self.parse_the_command_line()
+        #self.parse_the_command_line()
         if H: self.host= H
         if p: self.port= p
         if i: self.sid= i
@@ -151,7 +151,6 @@ class Client(object):
             sys.exit(-1)
         # == Initialize Connection To Server ==
         self.so.settimeout(0.5)
-
         n_fail = 5
         while True:
             # This string establishes track sensor angles! You can customize them.
@@ -170,21 +169,27 @@ class Client(object):
                 sockdata,addr= self.so.recvfrom(data_size)
                 sockdata = sockdata.decode(u'utf-8')
             except socket.error, emsg:
-                print u"Waiting for server on %d............" % self.port
-                print u"Count Down : " + unicode(n_fail)
-                if n_fail < 0:
-                    print u"relaunch torcs"
-                    os.system(u'pkill torcs')
-                    time.sleep(1.0)
-                    if self.vision is False:
-                        os.system(u'torcs -nofuel -nodamage -nolaptime &')
+                cur_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+                if self.vision is False:
+                    if self.display is True:
+                        print u"Waiting for server on %d............" % self.port
+                        print u"Count Down : " + unicode(n_fail)
+                        if n_fail < 0:
+                            print u"relaunch torcs"
+                            os.system(u'pkill torcs')
+                            time.sleep(0.5)
+                            os.system(u'torcs -nofuel -nodamage -nolaptime &')
+                            time.sleep(0.5)
+                            os.system(u'sh autostart.sh')
+                            n_fail = 5
+                        n_fail -= 1
                     else:
-                        os.system(u'torcs -nofuel -nodamage -nolaptime -vision &')
+                        os.system(u'pkill torcs')
+                        os.system(u'torcs -r '+cur_dir +'/race_config.xml -nofuel -nodamage -nolaptime &')
+                        time.sleep(0.5)
+                else:
+                    os.system(u'torcs -nofuel -nodamage -nolaptime -vision &')
 
-                    time.sleep(1.0)
-                    os.system(u'sh autostart.sh')
-                    n_fail = 5
-                n_fail -= 1
 
             identify = u'***identified***'
             if identify in sockdata:

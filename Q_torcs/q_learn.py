@@ -5,6 +5,7 @@ import single
 import os, signal
 import matplotlib.pyplot as plt
 import time
+import argparse
 saverate = 3
 dir_name = "Q_tables/"
 q_filepath = dir_name + "Q_table"
@@ -18,6 +19,10 @@ RR = 0.25
 # element 20 - track positions
 # element 21 - speed X
 # element 22 - speed Y
+def parse_args():
+	parser = argparse.ArgumentParser("Reinforcement Learning experiment for TORCS Driving Simulator")
+	parser.add_argument("--display", action="store_true", default=False)
+	return parser.parse_args()
 
 def filter_observations(ob):
 	sensors = np.zeros(7)
@@ -28,12 +33,12 @@ def filter_observations(ob):
 	sensors[4] = ob.trackPos
 	sensors[5] = ob.speedX
 	sensors[6] = ob.speedY
-
+	#print 'sensor data', sensors
 	return sensors
 
-def trainAgent():
+def trainAgent(arglist):
 	print("Loading TORCS environment")
-	env = TorcsEnv(vision=False, throttle=True, gear_change=False)
+	env = TorcsEnv(vision=False, throttle=True, gear_change=False, display=arglist.display)
 	agent = single.Q_learn(q_filepath, LR, RR)
 	if not os.path.exists(dir_name):
 		os.makedirs(dir_name)
@@ -128,5 +133,6 @@ def trainAgent():
 
 if __name__ == "__main__":
 	np.set_printoptions(precision=2)
-	trainAgent()
+	arglist = parse_args()
+	trainAgent(arglist)
 
