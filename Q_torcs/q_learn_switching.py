@@ -67,7 +67,7 @@ def trainAgent(arglist):
 			action = np.zeros([3])
 			action[1] = 1.
 			last_state = filter_observations(ob)
-			dp = ob.distFromStart
+			dp = 0.
 			d = 0.
 			for i in range(steps):
 				if done:
@@ -87,10 +87,13 @@ def trainAgent(arglist):
 				angle_variance.append(state[0])
 			
 				last_state = state
-
-			print colored('Episode: '+ str(ep) + ' Steps: '+ str(i) + ' Reward: '+ str(reward), 'red')
+				dp = dn
+				
 			print "LR:", agent.alpha
 			print "RR:", agent.epsilon
+			print colored('Episode: '+ str(ep) + ' Steps: '+ str(i) + ' Reward: '+ str(reward), 'red')
+			print "Distance:", d, "Time:", ob.curLapTime
+			
 			angle_variance = np.asarray(angle_variance)
 			var = np.sum(np.square(angle_variance-np.mean(angle_variance)))/np.size(angle_variance)
 		
