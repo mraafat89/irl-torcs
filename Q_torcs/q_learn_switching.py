@@ -9,6 +9,7 @@ import argparse
 from termcolor import colored
 
 saverate = 3
+switchrate = 100
 dir_name = "Q_tables/"
 q_filepath = dir_name + "Q_table"
 #Make sure to change filepath name!
@@ -103,13 +104,13 @@ def trainAgent(arglist):
 				agent.save_Q()
 				print("Saved Q-table")
 			
-			if np.mod(ep, 3) == 0:
+			if np.mod(ep, switchrate) == 0:
 				print "Switching TORCS Tracks..."
 				os.system('pkill torcs')
 				time.sleep(0.5)
 				os.system('torcs &')
 				time.sleep(0.5)
-				if np.mod(ep, 6) != 0:
+				if np.mod(ep, 3*switchrate) != 0:
 					os.system('sh switchtrack.sh')
 				else:
 					os.system('sh switchtrackback.sh')
