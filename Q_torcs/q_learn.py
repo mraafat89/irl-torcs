@@ -60,7 +60,7 @@ def trainAgent(arglist):
 				
 			#agent.alpha = max(0.225,LR*np.power(0.99,ep))
 			agent.epsilon = max(0.1,RR*np.power(0.999,ep))
-			reward = 0
+			agent.r = 0.0
 			done = False
 			angle_variance = []
 			action = np.zeros([3])
@@ -73,7 +73,7 @@ def trainAgent(arglist):
 					break
 				
 				ob, r, done, info = env.step(action)
-				reward += r
+
 				dn = ob.distFromStart
 				if np.abs(dn-dp) < 100.: d += dn-dp
 				
@@ -88,13 +88,14 @@ def trainAgent(arglist):
 				last_state = state
 				dp = dn
 				
-			print colored('Episode: '+ str(ep) + ' Steps: '+ str(i) + ' Reward: '+ str(reward), 'red')
+			print colored('Episode: '+ str(ep) + ' Steps: '+ str(i) + ' Reward: '+ str(agent.r), 'blue')
+			print colored('Distance: ' + str(d) + 'Time: ' + str(ob.curLapTime), 'blue')
 			print "LR:", agent.alpha
 			print "RR:", agent.epsilon
 			angle_variance = np.asarray(angle_variance)
 			var = np.sum(np.square(angle_variance-np.mean(angle_variance)))/np.size(angle_variance)
 		
-			agent.rewards.append(reward)
+			agent.rewards.append(agent.r)
 			agent.angles.append(var)
 			agent.distances.append(d)
 			agent.times.append(ob.curLapTime)

@@ -13,7 +13,8 @@ class Q_learn:
         self.alpha = alpha
         self.gamma = 0.99
         self.epsilon = epsilon
-
+        self.r = 0.0
+		
         #steering, accel, brake
         self.A = [(0.5,1.,0.),
                   (0.1,1.,0.),
@@ -98,7 +99,7 @@ class Q_learn:
         
         if s != sp or done:	
             self.Q[s, a] = self.Q[s, a] + self.alpha * (r + self.gamma * self.Q[sp, np.argmax(self.Q[sp, :])] - self.Q[s, a])
-
+            self.r += r
             if np.random.rand() > self.epsilon:
                 #print s, "%.1f" % r, self.Q[s, :]
                 ap = np.argmax(self.Q[sp, :])
