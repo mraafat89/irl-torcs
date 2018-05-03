@@ -102,6 +102,19 @@ def trainAgent(arglist):
 			if np.mod(ep, saverate) == 0:
 				agent.save_Q()
 				print("Saved Q-table")
+			
+			if np.mod(ep, 3) == 0:
+				print "Switching TORCS Tracks..."
+				os.system('pkill torcs')
+				time.sleep(0.5)
+				os.system('torcs &')
+				time.sleep(0.5)
+				if np.mod(ep, 6) != 0:
+					os.system('sh switchtrack.sh')
+				else:
+					os.system('sh switchtrackback.sh')
+				time.sleep(0.5)
+				ob = env.reset(relaunch=True)
 				
 		except KeyboardInterrupt:
 			print "Ending training"
