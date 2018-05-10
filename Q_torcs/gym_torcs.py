@@ -18,12 +18,13 @@ class TorcsEnv:
 
     initial_reset = True
 
-    def __init__(self, vision=False, throttle=False, gear_change=False, display=False):
+    def __init__(self, vision=False, throttle=False, gear_change=False, display=False, track_id=1):
         self.vision = vision
         self.throttle = throttle
         self.gear_change = gear_change
         self.display = display
         self.initial_run = True
+        self.track_id = track_id
 
         print("launch torcs")
         os.system('pkill torcs')
@@ -35,13 +36,14 @@ class TorcsEnv:
             if self.display is True:
                 os.system('torcs -nofuel -nolaptime &')
                 time.sleep(0.5)
-                os.system('sh autostart.sh')
+                os.system('sh '+ cur_dir + '/run_scripts/autostart'+ str(self.track_id)+'.sh')
+                #os.system('sh autostart.sh')
             else:
-                os.system('torcs -r ' + cur_dir + '/race_config.xml -nofuel -nolaptime &')
+                os.system('torcs -r ' + cur_dir + '/race_config/track-' + str(self.track_id) + '.xml -nofuel -nolaptime &')
 
         time.sleep(0.5)
         # Modify here if you use multiple tracks in the environment
-        self.client = snakeoil3.Client(p=3001, vision=self.vision, display=self.display)  # Open new UDP in vtorcs
+        self.client = snakeoil3.Client(p=3001, vision=self.vision, display=self.display, track_id=self.track_id)  # Open new UDP in vtorcs
         self.client.MAX_STEPS = np.inf
 
         client = self.client
@@ -62,18 +64,7 @@ class TorcsEnv:
             high = np.array([1., np.inf, np.inf, np.inf, 1., np.inf, 1., np.inf, 255])
             low = np.array([0., -np.inf, -np.inf, -np.inf, 0., -np.inf, 0., -np.inf, 0])
             self.observation_space = spaces.Box(low=low, high=high)
-        self.prevSpeedX = 0
-        self.prevAccX = 0
-        self.prevJerkX = 0
-        self.prevSnapX = 0
-
-        self.prevSpeedY = 0
-        self.prevAccY = 0
-        self.prevJerkY = 0
-        self.prevSnapY = 0
-
-        self.past_t = 0
-        self.past_d = 0
+        self.init_derivatives()
         self.KPH_to_MPS = 0.277778
 
     def step(self, u):
@@ -172,7 +163,7 @@ class TorcsEnv:
         #Rangle = np.power((1/((float(np.abs(obs['angle']))/40)+1)),4)*0.25
         #reward = Rspeed + Rtrackpos + Rangle - 0.5
         #reward = sp*(np.cos(obs['angle']) - np.abs(np.sin(obs['angle'])) - 10*np.abs(obs['angle'])*np.abs(obs['trackPos']))
-        reward = sp*(0.1-np.abs(obs['angle'])) + sp*(0.3-np.abs(obs['trackPos']))# - 0.01*jerkY
+        reward = sp*(0.1-np.abs(obs['angle'])) + sp*(0.3-np.abs(obs['trackPos'])) - 0.0001*jerkY
         #print 'reward' , reward, 'sp', obs['speedX'],'speedY', self.prevSpeedX, 'jerkY', jerkY, 'angle penalty',sp*(0.1-np.abs(obs['angle'])), 'track penalty' , sp*(0.3-np.abs(obs['trackPos']))
         progress = sp
 
@@ -217,7 +208,6 @@ class TorcsEnv:
 
     def reset(self, relaunch=False):
         #print("Reset")
-
         self.time_step = 0
 
         if self.initial_reset is not True:
@@ -230,9 +220,8 @@ class TorcsEnv:
                 print("### TORCS is RELAUNCHED ###")
 
         # Modify here if you use multiple tracks in the environment
-        self.client = snakeoil3.Client(p=3001, vision=self.vision, display=self.display)  # Open new UDP in vtorcs
+        self.client = snakeoil3.Client(p=3001, vision=self.vision, display=self.display, track_id=self.track_id)  # Open new UDP in vtorcs
         self.client.MAX_STEPS = np.inf
-
         client = self.client
         client.get_servers_input()  # Get the initial input from torcs
 
@@ -240,7 +229,7 @@ class TorcsEnv:
         self.observation = self.make_observaton(obs)
 
         self.last_u = None
-
+        self.init_derivatives()
         self.initial_reset = False
         return self.get_obs()
 
@@ -258,7 +247,8 @@ class TorcsEnv:
         if self.vision is True:
             os.system('torcs -nofuel -nodamage -nolaptime -vision &')
         else:
-            os.system('torcs -r ' + cur_dir + '\race_config.xml -nofuel -nolaptime &')
+            print ('gym_torcs track_id=', self.track_id)
+            os.system('torcs -r ' + cur_dir + '/race_config/track-'+ str(self.track_id) + '.xml -nofuel -nolaptime &')
         time.sleep(0.5)
         #os.system('sh autostart.sh')
         time.sleep(0.5)
@@ -337,3 +327,14 @@ class TorcsEnv:
                                trackPos=np.array(raw_obs['trackPos'], dtype=np.float32)/1.,
                                wheelSpinVel=np.array(raw_obs['wheelSpinVel'], dtype=np.float32),
                                img=image_rgb)
+    def init_derivatives(self):
+        self.prevSpeedX = 0
+        self.prevAccX = 0
+        self.prevJerkX = 0
+        self.prevSnapX = 0
+        self.prevSpeedY = 0
+        self.prevAccY = 0
+        self.prevJerkY = 0
+        self.prevSnapY = 0
+        self.past_t = 0
+        self.past_d = 0

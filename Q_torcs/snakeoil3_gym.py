@@ -118,9 +118,10 @@ def bargraph(x,mn,mx,w,c=u'X'):
     return u'[%s]' % (nnc+npc+ppc+pnc)
 
 class Client(object):
-    def __init__(self,H=None,p=None,i=None,e=None,t=None,s=None,d=None,vision=False, display=False):
+    def __init__(self,H=None,p=None,i=None,e=None,t=None,s=None,d=None,vision=False, display=False, track_id=1):
         # If you don't like the option defaults,  change them here.
         self.vision = vision
+        self.track_id = track_id
         self.display = display
         self.host= u'localhost'
         self.port= 3001
@@ -178,14 +179,16 @@ class Client(object):
                             print u"relaunch torcs"
                             os.system(u'pkill torcs')
                             time.sleep(0.5)
-                            os.system(u'torcs -nofuel -nodamage -nolaptime &')
+                            os.system('torcs -nofuel -nodamage -nolaptime &')
                             time.sleep(0.5)
-                            os.system(u'sh autostart.sh')
+                            #os.system('sh '+ cur_dir + '/run_scripts/autostart' + str(self.track_id) +'.sh')
+                            os.system('sh autostart.sh')
                             n_fail = 5
                         n_fail -= 1
                     else:
                         os.system(u'pkill torcs')
-                        os.system(u'torcs -r '+cur_dir +'/race_config.xml -nofuel -nodamage -nolaptime &')
+                        print ('hobba track_id = ', self.track_id)
+                        os.system(u'torcs -r '+cur_dir + '/race_config/track-'+ str(self.track_id) + '.xml -nofuel -nodamage -nolaptime &')
                         time.sleep(0.5)
                 else:
                     os.system(u'torcs -nofuel -nodamage -nolaptime -vision &')

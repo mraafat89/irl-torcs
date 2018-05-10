@@ -24,6 +24,8 @@ RR = 0.25
 def parse_args():
 	parser = argparse.ArgumentParser("Reinforcement Learning experiment for TORCS Driving Simulator")
 	parser.add_argument("--display", action="store_true", default=False)
+	parser.add_argument("--track-id", type=int, default=1, help="track id")
+	parser.add_argument("--demo", action="store_true", default=False)
 	return parser.parse_args()
 
 def filter_observations(ob):
@@ -40,7 +42,8 @@ def filter_observations(ob):
 
 def trainAgent(arglist):
 	print("Loading TORCS environment")
-	env = TorcsEnv(vision=False, throttle=True, gear_change=False, display=arglist.display)
+	print("q-learn track_id", arglist.track_id)
+	env = TorcsEnv(vision=False, throttle=True, gear_change=False, display=arglist.display, track_id=arglist.track_id)
 	agent = single.Q_learn(q_filepath, LR, RR)
 	if not os.path.exists(dir_name):
 		os.makedirs(dir_name)
@@ -57,23 +60,26 @@ def trainAgent(arglist):
 
 			else: 
 				ob = env.reset()
-				
+		
 			#agent.alpha = max(0.225,LR*np.power(0.99,ep))
-			agent.epsilon = max(0.1,RR*np.power(0.999,ep))
-			agent.r = 0.0
+			if arglist.demo is True:
+				agent.epsilon = 0
+			else:
+				agent.epsilon = max(0.1,RR*np.power(0.999,ep))
+			reward = 0
 			done = False
 			angle_variance = []
 			action = np.zeros([3])
 			action[1] = 1.
 			last_state = filter_observations(ob)
-			dp = 0.
+			dp = ob.distFromStart
 			d = 0.
 			for i in range(steps):
 				if done:
 					break
 				
 				ob, r, done, info = env.step(action)
-
+				reward += r
 				dn = ob.distFromStart
 				if np.abs(dn-dp) < 100.: d += dn-dp
 				
@@ -86,25 +92,24 @@ def trainAgent(arglist):
 				angle_variance.append(state[0])
 			
 				last_state = state
-				dp = dn
-				
-			print colored('Episode: '+ str(ep) + ' Steps: '+ str(i) + ' Reward: '+ str(agent.r), 'blue')
-			print colored('Distance: ' + str(d) + 'Time: ' + str(ob.curLapTime), 'blue')
+
+			print colored('Episode: '+ str(ep) + ' Steps: '+ str(i) + ' Reward: '+ str(reward), 'red')
 			print "LR:", agent.alpha
 			print "RR:", agent.epsilon
 			angle_variance = np.asarray(angle_variance)
 			var = np.sum(np.square(angle_variance-np.mean(angle_variance)))/np.size(angle_variance)
 		
-			agent.rewards.append(agent.r)
+			agent.rewards.append(reward)
 			agent.angles.append(var)
 			agent.distances.append(d)
 			agent.times.append(ob.curLapTime)
 			ep += 1
 			
 			if np.mod(ep, saverate) == 0:
-				agent.save_Q()
-				print("Saved Q-table")
-				
+				if arglist.demo is False:
+					agent.save_Q()
+					print("Saved Q-table")
+
 		except KeyboardInterrupt:
 			print "Ending training"
 			run = False
